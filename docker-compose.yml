@@ -1,0 +1,61 @@
+masterdata:
+  image: docker.sendgrid.net/sendgrid/madata
+  container_name: masterdata
+
+slave1data:
+  image: docker.sendgrid.net/sendgrid/madata
+  container_name: slave1data
+
+slave2data:
+  image: docker.sendgrid.net/sendgrid/madata
+  container_name: slave2data
+
+mysql-master:
+  image: percona:5.5
+  restart: on-failure:5
+  container_name: mysql-master
+  entrypoint: /tmp/mysql/entrypoint.sh
+  command: mysqld
+  volumes:
+    - ./mysql/master:/tmp/mysql
+  volumes_from:
+    - masterdata
+
+mysql-slave-1:
+  image: percona:5.5
+  restart: on-failure:5
+  container_name: mysql-slave-1
+  entrypoint: /tmp/mysql/entrypoint.sh
+  command: mysqld  
+  volumes:
+    - ./mysql/slave-1:/tmp/mysql  
+  volumes_from:
+    - slave1data
+  links:
+    - "mysql-master"    
+
+mysql-slave-2:
+  image: percona:5.5
+  restart: on-failure:5
+  container_name: mysql-slave-2
+  entrypoint: /tmp/mysql/entrypoint.sh
+  command: mysqld  
+  volumes:
+    - ./mysql/slave-2:/tmp/mysql  
+  volumes_from:
+    - slave2data
+  links:
+    - "mysql-master"    
+
+config:
+  image: percona:5.5
+  restart: on-failure:5
+  container_name: config
+  command: /tmp/config.sh
+  volumes:
+    - "./mysql/config:/tmp"
+  links:
+    - "mysql-master"
+    - "mysql-slave-1"
+    - "mysql-slave-2"
+    
