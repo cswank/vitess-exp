@@ -26,7 +26,7 @@ mysql-slave-1:
   restart: on-failure:5
   container_name: mysql-slave-1
   entrypoint: /tmp/mysql/entrypoint.sh
-  command: mysqld  
+  command: mysqld
   volumes:
     - ./mysql/slave-1:/tmp/mysql  
   volumes_from:
@@ -47,6 +47,7 @@ mysql-slave-2:
   links:
     - "mysql-master"    
 
+#sets up master-slave replication
 config:
   image: percona:5.5
   restart: on-failure:5
